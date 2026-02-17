@@ -6,6 +6,45 @@ import PublicationFigures from './PublicationFigures';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
 
+// Format descriptor names for display
+function formatDescriptorName(name) {
+  if (!name) return name;
+
+  // Handle special cases
+  const specialCases = {
+    'system_label': 'System',
+    'E_ads_eV': 'E_ads (eV)',
+    'E_ads': 'E_ads (eV)',
+    'HOMO_eV': 'HOMO (eV)',
+    'LUMO_eV': 'LUMO (eV)',
+    'Eg_eV': 'E_g (eV)',
+    'IP_eV': 'IP (eV)',
+    'EA_eV': 'EA (eV)',
+    'mu_eV': 'μ (eV)',
+    'chi_eV': 'χ (eV)',
+    'eta_eV': 'η (eV)',
+    'S_eV_inv': 'S (eV⁻¹)',
+    'omega_eV': 'ω (eV)',
+    'deltaN_max': 'ΔN_max',
+    'E_surface_eV': 'E_surface (eV)',
+    'E_surface+H2_eV': 'E_surface+H₂ (eV)',
+    'E_H2_eV': 'E_H₂ (eV)',
+  };
+
+  if (specialCases[name]) return specialCases[name];
+
+  // Generic pattern: replace _eV with (eV), _K with (K), etc.
+  let formatted = name
+    .replace(/_eV$/, ' (eV)')
+    .replace(/_K$/, ' (K)')
+    .replace(/_bar$/, ' (bar)')
+    .replace(/_inv$/, '⁻¹')
+    .replace(/delta/gi, 'Δ')
+    .replace(/_/g, ' ');
+
+  return formatted;
+}
+
 export default function DescriptorDashboard({ project }) {
   const [data, setData] = useState(null);
   const [correlation, setCorrelation] = useState(null);
@@ -143,7 +182,7 @@ export default function DescriptorDashboard({ project }) {
             className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5"
           >
             {descriptors.map((d) => (
-              <option key={d} value={d}>{d}</option>
+              <option key={d} value={d}>{formatDescriptorName(d)}</option>
             ))}
           </select>
         </div>
@@ -151,9 +190,9 @@ export default function DescriptorDashboard({ project }) {
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(2) : '—')} />
-            <Tooltip formatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(2) : '—')} />
-            <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} name={selectedDescriptor} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
+            <Tooltip formatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
+            <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} name={formatDescriptorName(selectedDescriptor)} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -168,7 +207,7 @@ export default function DescriptorDashboard({ project }) {
                 <th className="p-1"></th>
                 {correlation.columns.map((c) => (
                   <th key={c} className="p-1 text-slate-500 font-medium" style={{ writingMode: 'vertical-lr', maxWidth: 40 }}>
-                    {c}
+                    {formatDescriptorName(c)}
                   </th>
                 ))}
               </tr>
@@ -176,7 +215,7 @@ export default function DescriptorDashboard({ project }) {
             <tbody>
               {correlation.columns.map((row, i) => (
                 <tr key={row}>
-                  <td className="p-1 font-medium text-slate-600 whitespace-nowrap">{row}</td>
+                  <td className="p-1 font-medium text-slate-600 whitespace-nowrap">{formatDescriptorName(row)}</td>
                   {correlation.matrix[i].map((val, j) => {
                     // Handle null values (constant columns have undefined correlation)
                     if (val === null || val === undefined || isNaN(val)) {
@@ -195,7 +234,7 @@ export default function DescriptorDashboard({ project }) {
                         key={j}
                         className="p-1 text-center"
                         style={{ backgroundColor: color, color: absVal > 0.5 ? 'white' : 'inherit' }}
-                        title={`${row} vs ${correlation.columns[j]}: ${val.toFixed(3)}`}
+                        title={`${formatDescriptorName(row)} vs ${formatDescriptorName(correlation.columns[j])}: ${val.toFixed(3)}`}
                       >
                         {val.toFixed(2)}
                       </td>
@@ -220,7 +259,7 @@ export default function DescriptorDashboard({ project }) {
                 <tr>
                   <th className="p-2 text-left text-slate-600">System</th>
                   {Object.keys(shiftRows[0]).filter(k => k !== 'system').map((d) => (
-                    <th key={d} className="p-2 text-slate-500 font-medium">{d}</th>
+                    <th key={d} className="p-2 text-slate-500 font-medium">{formatDescriptorName(d)}</th>
                   ))}
                 </tr>
               </thead>
@@ -237,7 +276,7 @@ export default function DescriptorDashboard({ project }) {
                         : `rgba(139, 92, 246, ${intensity * 0.6})`;
                       return (
                         <td key={k} className="p-2 text-center font-mono" style={{ backgroundColor: bg }}>
-                          {v?.toFixed(2) || '—'}
+                          {typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—'}
                         </td>
                       );
                     })}
@@ -256,18 +295,29 @@ export default function DescriptorDashboard({ project }) {
           <thead>
             <tr>
               {data.columns.map((col) => (
-                <th key={col} className="p-2 text-left text-slate-500 font-medium whitespace-nowrap">{col}</th>
+                <th key={col} className="p-2 text-left text-slate-500 font-medium whitespace-nowrap">{formatDescriptorName(col)}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {data.data.map((row, i) => (
               <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
-                {data.columns.map((col) => (
-                  <td key={col} className="p-2 font-mono whitespace-nowrap">
-                    {row[col] !== null && row[col] !== undefined ? String(row[col]) : '—'}
-                  </td>
-                ))}
+                {data.columns.map((col) => {
+                  const val = row[col];
+                  let displayVal = '—';
+                  if (val !== null && val !== undefined) {
+                    if (typeof val === 'number' && !isNaN(val)) {
+                      displayVal = val.toFixed(3);
+                    } else {
+                      displayVal = String(val);
+                    }
+                  }
+                  return (
+                    <td key={col} className="p-2 font-mono whitespace-nowrap">
+                      {displayVal}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
