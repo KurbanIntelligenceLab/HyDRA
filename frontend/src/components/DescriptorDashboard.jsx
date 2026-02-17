@@ -13,26 +13,31 @@ function formatDescriptorName(name) {
   // Handle special cases with cleaner formatting for readability
   const specialCases = {
     'system_label': 'System',
-    'E_ads_eV': 'E_ads (eV)',
-    'E_ads': 'E_ads (eV)',
+    'E_ads_eV': 'Eₐₐₛ (eV)',
+    'E_ads': 'Eₐₐₛ',
     'HOMO_eV': 'HOMO (eV)',
     'LUMO_eV': 'LUMO (eV)',
-    'Eg_eV': 'E_g (eV)',
+    'Eg_eV': 'Eᵍ (eV)',
+    'Eg': 'Eᵍ',
     'IP_eV': 'IP (eV)',
     'EA_eV': 'EA (eV)',
     'mu_eV': 'μ (eV)',
+    'mu': 'μ',
     'chi_eV': 'χ (eV)',
+    'chi': 'χ',
     'eta_eV': 'η (eV)',
+    'eta': 'η',
     'S_eV_inv': 'S (eV⁻¹)',
     'omega_eV': 'ω (eV)',
-    'deltaN_max': 'ΔN_max',
-    'E_surface_eV': 'E_surface (eV)',
-    'E_surface+H2_eV': 'E_surface+H2 (eV)',
-    'E_H2_eV': 'E_H2 (eV)',
-    'E_elec_eV': 'E_elec (eV)',
-    'E_rep_eV': 'E_rep (eV)',
-    'E_disp_eV': 'E_disp (eV)',
-    'E_total_eV': 'E_total (eV)',
+    'omega': 'ω',
+    'deltaN_max': 'ΔNₘₐₓ',
+    'E_surface_eV': 'Eₛᵤᵣfₐcₑ (eV)',
+    'E_surface+H2_eV': 'Eₛᵤᵣfₐcₑ₊H₂ (eV)',
+    'E_H2_eV': 'EH₂ (eV)',
+    'E_elec_eV': 'Eₑₗₑc (eV)',
+    'E_rep_eV': 'Eᵣₑₚ (eV)',
+    'E_disp_eV': 'Eₐᵢₛₚ (eV)',
+    'E_total_eV': 'Eₜₒₜₐₗ (eV)',
   };
 
   if (specialCases[name]) return specialCases[name];
@@ -193,7 +198,7 @@ export default function DescriptorDashboard({ project }) {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} height={40} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
             <Tooltip formatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
             <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} name={formatDescriptorName(selectedDescriptor)} />
@@ -264,11 +269,11 @@ export default function DescriptorDashboard({ project }) {
         );
       })()}
 
-      {/* Descriptor shifts upon adsorption */}
+      {/* Descriptor shifts upon absorption */}
       {shiftRows.length > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h2 className="text-lg font-semibold text-slate-800 mb-4">
-            Descriptor Shifts Upon Adsorption
+            Descriptor Shifts Upon Absorption
           </h2>
           <div className="overflow-x-auto">
             <table className="text-xs w-full">

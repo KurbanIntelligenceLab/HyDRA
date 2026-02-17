@@ -78,10 +78,10 @@ function PanelEnergyDecomposition({ decompData }) {
     <div>
       <div className={PANEL_LABEL}>(b) Energy Decomposition</div>
       <ResponsiveContainer width="100%" height={240}>
-        <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
+        <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(2) : '—')} label={{ value: 'Shift vs pristine (eV)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
+          <YAxis tick={{ fontSize: 11 }} width={60} tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(2) : '—')} label={{ value: 'Shift vs pristine (eV)', angle: -90, position: 'insideLeft', fontSize: 11, offset: 0 }} />
           <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? (v >= 0 ? '+' : '') + v.toFixed(3) + ' eV' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           <Bar dataKey="elec" stackId="a" fill="#1f77b4" name="ΔE_elec" />
