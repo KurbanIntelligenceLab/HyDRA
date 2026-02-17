@@ -1,75 +1,217 @@
 # HyDRA Deployment Guide
 
-## Railway Deployment (Recommended)
+## Quick Start - Deploy to Railway
 
-HyDRA deploys as a single unified application on Railway, serving both the FastAPI backend and React frontend.
-
-### Architecture
-
-- **Platform**: Railway
-- **Dockerfile**: Multi-stage build that compiles the React frontend and serves it via FastAPI
-- **Frontend**: Built with Vite and served as static files from `/app/frontend/dist`
-- **Backend**: FastAPI server handles API routes (`/api/*`) and serves the frontend for all other routes
-
-### Required Environment Variables
-
-Set these in your Railway dashboard:
-
+### 1. Push Your Code
 ```bash
-OPENROUTER_API_KEY=your_api_key_here
-ALLOWED_ORIGINS=https://your-railway-app.up.railway.app
-SESSION_SECRET_KEY=your_secret_key_here
-SESSION_MAX_AGE=7200  # Optional, defaults to 2 hours
+git push
 ```
 
-### Deployment Steps
+### 2. Configure Railway
 
-1. **Connect Repository to Railway**
-   - Link your GitHub repository to Railway
-   - Railway will auto-detect the `railway.toml` configuration
+1. **Go to [Railway.app](https://railway.app)** and sign in
+2. **Create a New Project** → Select "Deploy from GitHub repo"
+3. **Connect your HyDRA repository**
+4. Railway will auto-detect the `railway.toml` and `Dockerfile`
 
-2. **Set Environment Variables**
-   - Add required variables in Railway dashboard
-   - Generate a secure SESSION_SECRET_KEY: `openssl rand -hex 32`
+### 3. Set Environment Variables
 
-3. **Deploy**
-   - Push to your main branch
-   - Railway will automatically build and deploy
-   - The app will be available at your Railway-provided URL
-
-### Health Check
-
-Railway monitors the `/api/health` endpoint to ensure the app is running properly.
-
-### Local Development
-
-For local development, run frontend and backend separately:
+In your Railway project dashboard, go to **Variables** and add:
 
 ```bash
-# Terminal 1 - Backend
+# Required
+OPENROUTER_API_KEY=sk-or-v1-xxxxx
+
+# Important: Update this after first deployment
+ALLOWED_ORIGINS=https://your-app-name.up.railway.app
+
+# Generate a secure key (run: openssl rand -hex 32)
+SESSION_SECRET_KEY=your-64-character-hex-key-here
+
+# Optional
+SESSION_MAX_AGE=7200
+OPENROUTER_MODEL=anthropic/claude-sonnet-4
+```
+
+### 4. Deploy
+
+Railway will automatically:
+- ✅ Build your React frontend
+- ✅ Build your Python backend
+- ✅ Serve everything from one URL
+- ✅ Monitor health at `/api/health`
+
+### 5. Update ALLOWED_ORIGINS
+
+After first deployment:
+1. Copy your Railway app URL (e.g., `hydra-production.up.railway.app`)
+2. Update the `ALLOWED_ORIGINS` variable to: `https://your-app-name.up.railway.app`
+3. Redeploy if needed
+
+---
+
+## Architecture Overview
+
+### Production (Railway)
+- **Single unified container** serves both frontend and backend
+- **Frontend**: React/Vite app built to static files, served by FastAPI
+- **Backend**: FastAPI handles `/api/*` routes
+- **Routing**: All non-API routes serve the React SPA
+
+### How it Works
+1. Multi-stage Docker build:
+   - Stage 1: Node.js builds the React frontend → `/app/frontend/dist`
+   - Stage 2: Python serves API + static files
+2. FastAPI routes:
+   - `/api/*` → Backend API endpoints
+   - `/*` → React frontend (SPA with fallback routing)
+
+---
+
+## Local Development
+
+### Option 1: Separate Frontend/Backend (Recommended for dev)
+
+**Terminal 1 - Backend:**
+```bash
 cd backend
 pip install -r requirements.txt
-uvicorn backend.main:app --reload
+uvicorn main:app --reload --port 8000
+```
 
-# Terminal 2 - Frontend
+**Terminal 2 - Frontend:**
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-The Vite dev server will proxy API requests to `http://localhost:8000`.
+Access at: `http://localhost:5173` (Vite dev server proxies API to `:8000`)
 
-### Troubleshooting
+### Option 2: Docker Compose (Production-like)
 
-- **Build fails**: Check Railway logs for specific errors
-- **Health check fails**: Ensure the app starts on Railway's `$PORT` variable
-- **API not responding**: Verify `OPENROUTER_API_KEY` is set correctly
-- **CORS errors**: Update `ALLOWED_ORIGINS` to include your Railway URL
+```bash
+docker-compose up
+```
 
-### Migration from Vercel + Railway
+Access at: `http://localhost:8000` (unified app)
 
-Previously, HyDRA used:
-- Vercel for frontend hosting
-- Railway for backend API
+To stop:
+```bash
+docker-compose down
+```
 
-Now everything runs on Railway for simplified deployment and management.
+---
+
+## Environment Variables Reference
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `OPENROUTER_API_KEY` | ✅ Yes | - | Your OpenRouter API key |
+| `ALLOWED_ORIGINS` | ✅ Yes | `localhost` | CORS allowed origins (use Railway URL in production) |
+| `SESSION_SECRET_KEY` | ⚠️ Recommended | `dev-secret-key` | Secret for session signing (generate with `openssl rand -hex 32`) |
+| `SESSION_MAX_AGE` | No | `7200` | Session duration in seconds (2 hours) |
+| `OPENROUTER_MODEL` | No | `anthropic/claude-sonnet-4` | LLM model to use |
+| `PORT` | No | `8000` | Port to run on (Railway sets this automatically) |
+
+---
+
+## Troubleshooting
+
+### Build Fails
+- Check Railway build logs for specific errors
+- Ensure `frontend/package.json` is valid
+- Ensure `backend/requirements.txt` has no typos
+
+### Health Check Fails
+- Verify app starts on Railway's `$PORT` variable
+- Check if `OPENROUTER_API_KEY` is set
+- View Railway logs for startup errors
+
+### API Returns 500 Errors
+- Check `OPENROUTER_API_KEY` is valid
+- View Railway logs for Python exceptions
+- Ensure OpenRouter account has credits
+
+### Frontend Shows White Screen
+- Check browser console for errors
+- Verify static files built correctly (Railway build logs)
+- Check CORS - ensure `ALLOWED_ORIGINS` includes Railway URL
+
+### CORS Errors
+- Update `ALLOWED_ORIGINS` in Railway variables
+- Format: `https://your-app.up.railway.app` (no trailing slash)
+- Redeploy after changing environment variables
+
+---
+
+## Monitoring
+
+### Health Check
+Visit `/api/health` to verify the app is running:
+```bash
+curl https://your-app.up.railway.app/api/health
+```
+
+Should return:
+```json
+{"status": "ok", "version": "1.0.0"}
+```
+
+### Railway Logs
+View real-time logs in Railway dashboard under **Deployments** → **View Logs**
+
+---
+
+## Deployment Checklist
+
+Before deploying to production:
+
+- [ ] Generate secure `SESSION_SECRET_KEY`
+- [ ] Set `OPENROUTER_API_KEY` in Railway
+- [ ] Update `ALLOWED_ORIGINS` to Railway URL
+- [ ] Test health endpoint after deployment
+- [ ] Verify frontend loads correctly
+- [ ] Test API endpoints work
+- [ ] Check Railway logs for errors
+
+---
+
+## Migration Notes
+
+### From Previous Vercel + Railway Setup
+
+Previously HyDRA used:
+- ✗ Vercel for frontend hosting
+- ✗ Railway for backend API
+- ✗ Nginx proxy in docker-compose
+
+Now simplified to:
+- ✅ Railway for everything (frontend + backend)
+- ✅ Single unified Dockerfile
+- ✅ No CORS proxy needed
+- ✅ Simpler configuration
+
+**Files deprecated:**
+- `vercel.json.deprecated` - Old Vercel config (kept for reference)
+- `nginx.conf.deprecated` - Old Nginx config (for docker-compose)
+- `Dockerfile.backend` - Replaced by unified `Dockerfile`
+
+---
+
+## Cost Estimation
+
+Railway pricing (as of 2024):
+- **Hobby Plan**: $5/month for 500 hours execution time
+- **Pro Plan**: $20/month for usage-based billing
+- Typically costs $5-15/month for a small app like HyDRA
+
+**Free tier available** with limited hours - good for testing!
+
+---
+
+## Support
+
+- **Railway Docs**: https://docs.railway.app
+- **Railway Status**: https://status.railway.app
+- **OpenRouter Docs**: https://openrouter.ai/docs
