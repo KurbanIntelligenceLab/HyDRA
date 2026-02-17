@@ -10,14 +10,14 @@ const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'
 function formatDescriptorName(name) {
   if (!name) return name;
 
-  // Handle special cases with proper subscripts and symbols
+  // Handle special cases with cleaner formatting for readability
   const specialCases = {
     'system_label': 'System',
-    'E_ads_eV': 'Eₐₐₛ (eV)',
-    'E_ads': 'Eₐₐₛ (eV)',
+    'E_ads_eV': 'E_ads (eV)',
+    'E_ads': 'E_ads (eV)',
     'HOMO_eV': 'HOMO (eV)',
     'LUMO_eV': 'LUMO (eV)',
-    'Eg_eV': 'Eᵍ (eV)',
+    'Eg_eV': 'E_g (eV)',
     'IP_eV': 'IP (eV)',
     'EA_eV': 'EA (eV)',
     'mu_eV': 'μ (eV)',
@@ -25,14 +25,14 @@ function formatDescriptorName(name) {
     'eta_eV': 'η (eV)',
     'S_eV_inv': 'S (eV⁻¹)',
     'omega_eV': 'ω (eV)',
-    'deltaN_max': 'ΔNₘₐₓ',
-    'E_surface_eV': 'Eₛᵤᵣfₐcₑ (eV)',
-    'E_surface+H2_eV': 'Eₛᵤᵣfₐcₑ₊H₂ (eV)',
-    'E_H2_eV': 'EH₂ (eV)',
-    'E_elec_eV': 'Eₑₗₑc (eV)',
-    'E_rep_eV': 'Eᵣₑₚ (eV)',
-    'E_disp_eV': 'Eₐᵢₛₚ (eV)',
-    'E_total_eV': 'Eₜₒₜₐₗ (eV)',
+    'deltaN_max': 'ΔN_max',
+    'E_surface_eV': 'E_surface (eV)',
+    'E_surface+H2_eV': 'E_surface+H2 (eV)',
+    'E_H2_eV': 'E_H2 (eV)',
+    'E_elec_eV': 'E_elec (eV)',
+    'E_rep_eV': 'E_rep (eV)',
+    'E_disp_eV': 'E_disp (eV)',
+    'E_total_eV': 'E_total (eV)',
   };
 
   if (specialCases[name]) return specialCases[name];
@@ -44,8 +44,6 @@ function formatDescriptorName(name) {
     .replace(/_bar$/, ' (bar)')
     .replace(/_inv$/, '⁻¹')
     .replace(/delta/gi, 'Δ')
-    .replace(/E_ads/g, 'Eₐₐₛ')
-    .replace(/E_g/g, 'Eᵍ')
     .replace(/_/g, ' ');
 
   return formatted;
@@ -204,54 +202,67 @@ export default function DescriptorDashboard({ project }) {
       </div>
 
       {/* Correlation heatmap (simplified as a table) */}
-      {correlation && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 overflow-x-auto">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">Correlation Matrix</h2>
-          <table className="text-xs w-full">
-            <thead>
-              <tr>
-                <th className="p-1"></th>
-                {correlation.columns.map((c) => (
-                  <th key={c} className="p-1 text-slate-500 font-medium" style={{ writingMode: 'vertical-lr', maxWidth: 40 }}>
-                    {formatDescriptorName(c)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {correlation.columns.map((row, i) => (
-                <tr key={row}>
-                  <td className="p-1 font-medium text-slate-600 whitespace-nowrap">{formatDescriptorName(row)}</td>
-                  {correlation.matrix[i].map((val, j) => {
-                    // Handle null values (constant columns have undefined correlation)
-                    if (val === null || val === undefined || isNaN(val)) {
+      {correlation && (() => {
+        // Filter out columns/rows that are all null/undefined (like E_H2_eV)
+        const validIndices = correlation.columns
+          .map((col, idx) => {
+            const hasValidData = correlation.matrix[idx].some(val => val !== null && val !== undefined && !isNaN(val));
+            return hasValidData ? idx : null;
+          })
+          .filter(idx => idx !== null);
+
+        const filteredColumns = validIndices.map(i => correlation.columns[i]);
+        const filteredMatrix = validIndices.map(i => validIndices.map(j => correlation.matrix[i][j]));
+
+        return (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 overflow-x-auto">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">Correlation Matrix</h2>
+            <table className="text-xs w-full">
+              <thead>
+                <tr>
+                  <th className="p-1"></th>
+                  {filteredColumns.map((c) => (
+                    <th key={c} className="p-1 text-slate-500 font-medium" style={{ writingMode: 'vertical-lr', maxWidth: 40 }}>
+                      {formatDescriptorName(c)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredColumns.map((row, i) => (
+                  <tr key={row}>
+                    <td className="p-1 font-medium text-slate-600 whitespace-nowrap">{formatDescriptorName(row)}</td>
+                    {filteredMatrix[i].map((val, j) => {
+                      // Handle null values (constant columns have undefined correlation)
+                      if (val === null || val === undefined || isNaN(val)) {
+                        return (
+                          <td key={j} className="p-1 text-center text-slate-300">
+                            —
+                          </td>
+                        );
+                      }
+                      const absVal = Math.abs(val);
+                      const color = val > 0
+                        ? `rgba(59, 130, 246, ${absVal * 0.8})`
+                        : `rgba(239, 68, 68, ${absVal * 0.8})`;
                       return (
-                        <td key={j} className="p-1 text-center text-slate-300">
-                          —
+                        <td
+                          key={j}
+                          className="p-1 text-center"
+                          style={{ backgroundColor: color, color: absVal > 0.5 ? 'white' : 'inherit' }}
+                          title={`${formatDescriptorName(row)} vs ${formatDescriptorName(filteredColumns[j])}: ${val.toFixed(3)}`}
+                        >
+                          {val.toFixed(2)}
                         </td>
                       );
-                    }
-                    const absVal = Math.abs(val);
-                    const color = val > 0
-                      ? `rgba(59, 130, 246, ${absVal * 0.8})`
-                      : `rgba(239, 68, 68, ${absVal * 0.8})`;
-                    return (
-                      <td
-                        key={j}
-                        className="p-1 text-center"
-                        style={{ backgroundColor: color, color: absVal > 0.5 ? 'white' : 'inherit' }}
-                        title={`${formatDescriptorName(row)} vs ${formatDescriptorName(correlation.columns[j])}: ${val.toFixed(3)}`}
-                      >
-                        {val.toFixed(2)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
 
       {/* Descriptor shifts upon adsorption */}
       {shiftRows.length > 0 && (
