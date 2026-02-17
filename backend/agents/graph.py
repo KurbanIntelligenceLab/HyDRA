@@ -32,7 +32,7 @@ class AgentState(TypedDict):
 
 # The LLM used for routing and synthesis
 def _get_llm():
-    return get_llm(max_tokens=1000)  # Reduced for faster responses
+    return get_llm(max_tokens=3000)  # Increased for complete responses
 
 
 ROUTER_SYSTEM_PROMPT = """Route user queries to agents. Respond with JSON only.
@@ -137,9 +137,9 @@ def synthesize_response(state: AgentState) -> AgentState:
     for agent_name, result in state["agent_results"].items():
         results_text += f"\n--- {agent_name.upper()} AGENT ---\n"
         if isinstance(result, dict):
-            results_text += json.dumps(result, indent=2, default=str)[:3000]
+            results_text += json.dumps(result, indent=2, default=str)[:8000]
         else:
-            results_text += str(result)[:3000]
+            results_text += str(result)[:8000]
 
     response = llm.invoke([
         SystemMessage(content=SYNTHESIS_SYSTEM_PROMPT),

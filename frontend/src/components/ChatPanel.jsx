@@ -94,7 +94,7 @@ export default function ChatPanel({ project, onAgentActivity, messages: external
       </div>
 
       {/* Messages */}
-      <div className="h-[250px] overflow-y-auto p-4 space-y-4">
+      <div className="h-[500px] overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center py-16 text-slate-400">
             <Bot className="w-12 h-12 mx-auto mb-3" />
@@ -124,7 +124,9 @@ export default function ChatPanel({ project, onAgentActivity, messages: external
                 }`}
               >
                 {msg.role === 'assistant' ? (
-                  <ReactMarkdown className="prose prose-sm max-w-none prose-slate">
+                  <ReactMarkdown
+                    className="prose prose-sm max-w-none prose-slate prose-p:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2 prose-code:bg-slate-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-slate-800 prose-pre:text-slate-100"
+                  >
                     {msg.content}
                   </ReactMarkdown>
                 ) : (
