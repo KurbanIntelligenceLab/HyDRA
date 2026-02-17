@@ -90,8 +90,6 @@ def route_query(state: AgentState) -> AgentState:
 
 def run_agents(state: AgentState) -> AgentState:
     """Run all routed specialist agents and collect results."""
-    import asyncio
-
     results = {}
     agent_map = {
         "descriptor": run_descriptor_agent,
@@ -101,28 +99,15 @@ def run_agents(state: AgentState) -> AgentState:
         "reasoning": run_reasoning_agent,
     }
 
-    # Run agents in parallel for speed
-    async def run_agent_async(agent_name):
+    # Run agents sequentially (safe for Uvicorn/FastAPI)
+    for agent_name in state["active_agents"]:
         if agent_name in agent_map:
             try:
-                # Run in executor to parallelize synchronous agent calls
-                loop = asyncio.get_event_loop()
-                result = await loop.run_in_executor(
-                    None, agent_map[agent_name], state["query"], state["project"]
-                )
-                return agent_name, result
+                results[agent_name] = agent_map[agent_name](state["query"], state["project"])
             except Exception as e:
-                return agent_name, {"error": str(e)}
-        return agent_name, {"error": "Unknown agent"}
-
-    # Run all agents concurrently
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    tasks = [run_agent_async(name) for name in state["active_agents"]]
-    agent_results = loop.run_until_complete(asyncio.gather(*tasks))
-    loop.close()
-
-    results = {name: result for name, result in agent_results}
+                results[agent_name] = {"error": str(e)}
+        else:
+            results[agent_name] = {"error": "Unknown agent"}
 
     return {**state, "agent_results": results}
 
