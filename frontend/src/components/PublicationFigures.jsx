@@ -198,14 +198,14 @@ function PanelT50vsPressure({ t50Data }) {
     <div>
       <div className={PANEL_LABEL}>(d) T₅₀ vs Pressure</div>
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <ReferenceArea y1={233.15} y2={358.15} fill="#10b981" fillOpacity={0.12} />
           <XAxis dataKey="pressure" tick={{ fontSize: 11 }} scale="log" domain={['auto', 'auto']}
             type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }}
             tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
-          <YAxis tick={{ fontSize: 11 }} domain={[220, 385]} width={60}
-            label={{ value: 'T₅₀ (K)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -8 }}
+          <YAxis tick={{ fontSize: 11 }} domain={[220, 385]} width={55}
+            label={{ value: 'T₅₀ (K)', angle: -90, position: 'insideLeft', fontSize: 11, offset: 0 }}
             tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(0) : '—')} />
           <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) + ' K' : '—')} labelFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) + ' bar' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
