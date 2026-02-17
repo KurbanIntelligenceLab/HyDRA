@@ -191,6 +191,28 @@ docker-compose down
 - Ensure SSL certificate is provisioned in Railway (automatic)
 - Wait up to 48 hours for global DNS propagation
 
+### Out of Memory (OOM) Errors
+If Railway shows "Out of memory" or crash loops:
+
+**Quick Fix** (Disable PySR):
+1. PySR (symbolic regression) is commented out in `requirements.txt` by default
+2. This saves ~300MB memory by avoiding Julia installation
+3. The app will use analytical fallbacks instead
+4. To enable PySR: uncomment `pysr>=0.19` in `requirements.txt` and redeploy
+
+**Other Memory Optimizations**:
+- Railway free tier: 512MB RAM limit
+- Dockerfile uses single worker (`--workers 1`) to reduce memory
+- Upgrade to Railway Pro for more memory if needed
+- Check Railway logs for specific OOM errors
+
+**Memory Usage by Component**:
+- Base Python + packages: ~200MB
+- FastAPI + Uvicorn: ~50MB
+- Frontend build (build-time only): ~500MB (discarded after build)
+- PySR + Julia (optional): ~300MB
+- App runtime: ~350MB without PySR, ~650MB with PySR
+
 ---
 
 ## Monitoring
