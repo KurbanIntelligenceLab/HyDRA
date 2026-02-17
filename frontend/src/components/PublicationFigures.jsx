@@ -188,7 +188,7 @@ function PanelT50vsPressure({ t50Data }) {
 
       const idx = sysData.pressures_bar.indexOf(p);
       if (idx >= 0 && idx < sysData.T50_K.length) {
-        point[systemShort(s)] = sysData.   T50_K[idx];
+        point[systemShort(s)] = sysData.T50_K[idx];
       }
     });
     return point;
@@ -198,7 +198,7 @@ function PanelT50vsPressure({ t50Data }) {
     <div>
       <div className={PANEL_LABEL}>(d) T₅₀ vs Pressure</div>
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 40, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <ReferenceArea y1={233.15} y2={358.15} fill="#10b981" fillOpacity={0.12} />
           <XAxis dataKey="pressure" tick={{ fontSize: 11 }} scale="log" domain={['auto', 'auto']}
@@ -248,7 +248,7 @@ function PanelCoverageVsTemp({ covTData }) {
     <div>
       <div className={PANEL_LABEL}>(e) Coverage vs Temperature (1 bar)</div>
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 35, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <ReferenceArea x1={233} x2={358} fill="#10b981" fillOpacity={0.12} />
           <XAxis dataKey="T" tick={{ fontSize: 11 }} type="number" domain={['auto', 'auto']}
@@ -297,7 +297,7 @@ function PanelCoverageVsPressure({ covPData }) {
     <div>
       <div className={PANEL_LABEL}>(f) Coverage vs Pressure (298 K)</div>
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 35, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="P" tick={{ fontSize: 11 }} scale="log" domain={['auto', 'auto']}
             type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
