@@ -12,8 +12,12 @@ const QUICK_QUESTIONS = [
   "Find an interpretable formula for Eads",
 ];
 
-export default function ChatPanel({ project, onAgentActivity }) {
-  const [messages, setMessages] = useState([]);
+export default function ChatPanel({ project, onAgentActivity, messages: externalMessages, setMessages: externalSetMessages }) {
+  // Use external state if provided, otherwise use internal state (backwards compatibility)
+  const [internalMessages, setInternalMessages] = useState([]);
+  const messages = externalMessages !== undefined ? externalMessages : internalMessages;
+  const setMessages = externalSetMessages !== undefined ? externalSetMessages : setInternalMessages;
+
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeAgents, setActiveAgents] = useState([]);

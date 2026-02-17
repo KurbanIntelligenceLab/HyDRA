@@ -9,6 +9,74 @@ import { MathNotation } from '../utils/mathNotation';
 
 const COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7'];
 
+// Format descriptor names for display
+function formatDescriptorName(name) {
+  if (!name) return name;
+
+  // Handle special cases with proper subscripts and symbols
+  const specialCases = {
+    'system_label': 'System',
+    'E_ads_eV': 'Eₐₐₛ (eV)',
+    'E_ads': 'Eₐₐₛ',
+    'HOMO_eV': 'HOMO (eV)',
+    'LUMO_eV': 'LUMO (eV)',
+    'Eg_eV': 'Eᵍ (eV)',
+    'Eg': 'Eᵍ',
+    'IP_eV': 'IP (eV)',
+    'EA_eV': 'EA (eV)',
+    'mu_eV': 'μ (eV)',
+    'mu': 'μ',
+    'chi_eV': 'χ (eV)',
+    'chi': 'χ',
+    'eta_eV': 'η (eV)',
+    'eta': 'η',
+    'S_eV_inv': 'S (eV⁻¹)',
+    'omega_eV': 'ω (eV)',
+    'omega': 'ω',
+    'deltaN_max': 'ΔNₘₐₓ',
+    'E_surface_eV': 'Eₛᵤᵣfₐcₑ (eV)',
+    'E_surface+H2_eV': 'Eₛᵤᵣfₐcₑ₊H₂ (eV)',
+    'E_H2_eV': 'EH₂ (eV)',
+    'E_elec_eV': 'Eₑₗₑc (eV)',
+    'E_rep_eV': 'Eᵣₑₚ (eV)',
+    'E_disp_eV': 'Eₐᵢₛₚ (eV)',
+    'E_total_eV': 'Eₜₒₜₐₗ (eV)',
+  };
+
+  if (specialCases[name]) return specialCases[name];
+
+  // Generic pattern: replace _eV with (eV), _K with (K), etc.
+  let formatted = name
+    .replace(/_eV$/, ' (eV)')
+    .replace(/_K$/, ' (K)')
+    .replace(/_bar$/, ' (bar)')
+    .replace(/_inv$/, '⁻¹')
+    .replace(/delta/gi, 'Δ')
+    .replace(/E_ads/g, 'Eₐₐₛ')
+    .replace(/E_g/g, 'Eᵍ')
+    .replace(/\bmu\b/g, 'μ')
+    .replace(/\bchi\b/g, 'χ')
+    .replace(/\beta/g, 'η')
+    .replace(/\bomega\b/g, 'ω')
+    .replace(/_/g, ' ');
+
+  return formatted;
+}
+
+// Format equations to use proper notation
+function formatEquation(equation) {
+  if (!equation) return equation;
+
+  return equation
+    .replace(/E_ads/g, 'Eₐₐₛ')
+    .replace(/E_g/g, 'Eᵍ')
+    .replace(/\bEg\b/g, 'Eᵍ')
+    .replace(/\bmu\b/g, 'μ')
+    .replace(/\bchi\b/g, 'χ')
+    .replace(/\beta/g, 'η')
+    .replace(/\bomega\b/g, 'ω');
+}
+
 export default function MLInsights({ project }) {
   const [symReg, setSymReg] = useState(null);
   const [gp, setGp] = useState(null);
@@ -43,7 +111,7 @@ export default function MLInsights({ project }) {
 
   // Feature importance chart data
   const importanceChartData = importance?.ranked_features?.map((f) => ({
-    feature: f.feature,
+    feature: formatDescriptorName(f.feature),
     correlation: Math.abs(f.correlation_with_target),
     sign: f.correlation_with_target > 0 ? 'positive' : 'negative',
   })) || [];
@@ -113,7 +181,7 @@ export default function MLInsights({ project }) {
               {symReg.best_equation && (
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
                   <div className="text-xs text-purple-600 font-medium mb-1">Best Equation</div>
-                  <code className="text-lg font-mono text-purple-800">{symReg.best_equation}</code>
+                  <code className="text-lg font-mono text-purple-800">{formatEquation(symReg.best_equation)}</code>
                 </div>
               )}
               {symReg.equations?.length > 0 && (
@@ -121,7 +189,7 @@ export default function MLInsights({ project }) {
                   <div className="text-sm font-medium text-slate-600">All discovered equations (Pareto front):</div>
                   {symReg.equations.map((eq, i) => (
                     <div key={i} className="flex items-center gap-4 text-xs bg-slate-50 rounded-lg p-3">
-                      <code className="flex-1 font-mono text-slate-800">{eq.equation}</code>
+                      <code className="flex-1 font-mono text-slate-800">{formatEquation(eq.equation)}</code>
                       <span className="text-slate-500">complexity: {eq.complexity}</span>
                       <span className="text-slate-500">loss: {eq.loss?.toFixed(6)}</span>
                       {eq.r_squared !== undefined && (
@@ -231,7 +299,7 @@ export default function MLInsights({ project }) {
             Feature Importance
           </h3>
           <p className="text-xs text-slate-500 mb-4">
-            Most important: <span className="font-bold">{importance.most_important}</span>
+            Most important: <span className="font-bold">{formatDescriptorName(importance.most_important)}</span>
           </p>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={importanceChartData} layout="vertical">

@@ -23,6 +23,7 @@ export default function App() {
   const [project, setProject] = useState('zr-tio2');
   const [projects, setProjects] = useState([]);
   const [agentLog, setAgentLog] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
 
   useEffect(() => {
     getProjects().then(setProjects).catch(() => {});
@@ -83,7 +84,12 @@ export default function App() {
       {/* Content */}
       <main className="max-w-[1400px] mx-auto p-6">
         {activeTab === 'chat' && (
-          <ChatPanel project={project} onAgentActivity={addAgentLog} />
+          <ChatPanel
+            project={project}
+            onAgentActivity={addAgentLog}
+            messages={chatMessages}
+            setMessages={setChatMessages}
+          />
         )}
         {activeTab === 'structure' && (
           <MoleculeViewer project={project} />
