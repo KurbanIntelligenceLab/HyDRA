@@ -10,14 +10,14 @@ const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899'
 function formatDescriptorName(name) {
   if (!name) return name;
 
-  // Handle special cases
+  // Handle special cases with proper subscripts and symbols
   const specialCases = {
     'system_label': 'System',
-    'E_ads_eV': 'E_ads (eV)',
-    'E_ads': 'E_ads (eV)',
+    'E_ads_eV': 'Eₐₐₛ (eV)',
+    'E_ads': 'Eₐₐₛ (eV)',
     'HOMO_eV': 'HOMO (eV)',
     'LUMO_eV': 'LUMO (eV)',
-    'Eg_eV': 'E_g (eV)',
+    'Eg_eV': 'Eᵍ (eV)',
     'IP_eV': 'IP (eV)',
     'EA_eV': 'EA (eV)',
     'mu_eV': 'μ (eV)',
@@ -25,10 +25,14 @@ function formatDescriptorName(name) {
     'eta_eV': 'η (eV)',
     'S_eV_inv': 'S (eV⁻¹)',
     'omega_eV': 'ω (eV)',
-    'deltaN_max': 'ΔN_max',
-    'E_surface_eV': 'E_surface (eV)',
-    'E_surface+H2_eV': 'E_surface+H₂ (eV)',
-    'E_H2_eV': 'E_H₂ (eV)',
+    'deltaN_max': 'ΔNₘₐₓ',
+    'E_surface_eV': 'Eₛᵤᵣfₐcₑ (eV)',
+    'E_surface+H2_eV': 'Eₛᵤᵣfₐcₑ₊H₂ (eV)',
+    'E_H2_eV': 'EH₂ (eV)',
+    'E_elec_eV': 'Eₑₗₑc (eV)',
+    'E_rep_eV': 'Eᵣₑₚ (eV)',
+    'E_disp_eV': 'Eₐᵢₛₚ (eV)',
+    'E_total_eV': 'Eₜₒₜₐₗ (eV)',
   };
 
   if (specialCases[name]) return specialCases[name];
@@ -40,6 +44,8 @@ function formatDescriptorName(name) {
     .replace(/_bar$/, ' (bar)')
     .replace(/_inv$/, '⁻¹')
     .replace(/delta/gi, 'Δ')
+    .replace(/E_ads/g, 'Eₐₐₛ')
+    .replace(/E_g/g, 'Eᵍ')
     .replace(/_/g, ' ');
 
   return formatted;

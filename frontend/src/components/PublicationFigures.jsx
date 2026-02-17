@@ -202,10 +202,12 @@ function PanelT50vsPressure({ t50Data }) {
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <ReferenceArea y1={233.15} y2={358.15} fill="#10b981" fillOpacity={0.12} />
           <XAxis dataKey="pressure" tick={{ fontSize: 11 }} scale="log" domain={['auto', 'auto']}
-            type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} domain={[220, 385]}
-            label={{ value: 'T₅₀ (K)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) + ' K' : '—')} labelFormatter={v => (typeof v === 'number' && !isNaN(v) ? v + ' bar' : '—')} />
+            type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }}
+            tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
+          <YAxis tick={{ fontSize: 11 }} domain={[220, 385]} width={50}
+            label={{ value: 'T₅₀ (K)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }}
+            tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) : '—')} />
+          <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) + ' K' : '—')} labelFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) + ' bar' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {systems.map(s => (
             <Line key={s} type="monotone" dataKey={systemShort(s)} stroke={systemColor(s)}
@@ -253,7 +255,8 @@ function PanelCoverageVsTemp({ covTData }) {
           <ReferenceArea x1={233} x2={358} fill="#10b981" fillOpacity={0.12} />
           <XAxis dataKey="T" tick={{ fontSize: 11 }} type="number" domain={['auto', 'auto']}
             label={{ value: 'Temperature (K)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) : '—')}
+          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} width={45}
+            tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) : '—')}
             label={{ value: 'Coverage θ', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
           <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} labelFormatter={v => (typeof v === 'number' && !isNaN(v) ? v + ' K' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
@@ -300,10 +303,12 @@ function PanelCoverageVsPressure({ covPData }) {
         <LineChart data={chartData} margin={{ top: 10, right: 30, left: 35, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="P" tick={{ fontSize: 11 }} scale="log" domain={['auto', 'auto']}
-            type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) : '—')}
+            type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }}
+            tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} />
+          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} width={45}
+            tickFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(1) : '—')}
             label={{ value: 'Coverage θ', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} labelFormatter={v => (typeof v === 'number' && !isNaN(v) ? v + ' bar' : '—')} />
+          <Tooltip formatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) : '—')} labelFormatter={v => (typeof v === 'number' && !isNaN(v) ? v.toFixed(3) + ' bar' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {systems.map(s => (
             <Line key={s} type="monotone" dataKey={systemShort(s)} stroke={systemColor(s)}
