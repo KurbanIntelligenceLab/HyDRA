@@ -15,6 +15,7 @@ export default function DescriptorDashboard({ project }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('[DescriptorDashboard] Loading data for project:', project);
     setLoading(true);
     setError(null);
 
@@ -23,6 +24,7 @@ export default function DescriptorDashboard({ project }) {
       getCorrelation(project),
       getShifts(project),
     ]).then(([desc, corr, sh]) => {
+      console.log('[DescriptorDashboard] Data loaded:', { desc, corr, sh });
       setData(desc);
       setCorrelation(corr);
       setShifts(sh);
@@ -33,7 +35,8 @@ export default function DescriptorDashboard({ project }) {
 
       setLoading(false);
     }).catch((err) => {
-      setError(err.message || 'Failed to load data');
+      console.error('[DescriptorDashboard] Error loading data:', err);
+      setError(err.message || String(err) || 'Failed to load data');
       setLoading(false);
     });
   }, [project]);

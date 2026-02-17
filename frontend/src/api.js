@@ -20,11 +20,15 @@ async function fetchJson(url, options = {}) {
     headers['X-Session-ID'] = sessionId;
   }
 
+  console.log('[API] Fetching:', `${BASE}${url}`, { headers, options });
+
   const res = await fetch(`${BASE}${url}`, {
     headers,
     credentials: 'include', // Include cookies for session management
     ...options,
   });
+
+  console.log('[API] Response:', res.status, res.statusText);
 
   // Extract and save session ID from response header
   const responseSessionId = res.headers.get('X-Session-ID');
@@ -34,9 +38,12 @@ async function fetchJson(url, options = {}) {
 
   if (!res.ok) {
     const text = await res.text();
+    console.error('[API] Error response:', text);
     throw new Error(`API error ${res.status}: ${text}`);
   }
-  return res.json();
+  const data = await res.json();
+  console.log('[API] Response data:', data);
+  return data;
 }
 
 // Projects
