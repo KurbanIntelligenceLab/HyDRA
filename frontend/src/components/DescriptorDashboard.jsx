@@ -151,8 +151,8 @@ export default function DescriptorDashboard({ project }) {
           <BarChart data={barData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (v != null ? v.toFixed(2) : '—')} />
-            <Tooltip formatter={(v) => (v != null ? v.toFixed(2) : '—')} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(2) : '—')} />
+            <Tooltip formatter={(v) => (typeof v === 'number' && !isNaN(v) ? v.toFixed(2) : '—')} />
             <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} name={selectedDescriptor} />
           </BarChart>
         </ResponsiveContainer>
