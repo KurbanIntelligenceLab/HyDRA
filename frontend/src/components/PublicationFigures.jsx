@@ -42,8 +42,8 @@ function PanelEadsLollipop({ eadsData }) {
         <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={v => v.toFixed(2)} label={{ value: 'E_ads (eV)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => v.toFixed(3) + ' eV'} />
+          <YAxis tick={{ fontSize: 11 }} tickFormatter={v => (v != null ? v.toFixed(2) : '—')} label={{ value: 'E_ads (eV)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
+          <Tooltip formatter={v => (v != null ? v.toFixed(3) + ' eV' : '—')} />
           <Bar dataKey="value" barSize={4} isAnimationActive={false}>
             {chartData.map((d, i) => (
               <rect key={i} fill={d.color} />
@@ -81,8 +81,8 @@ function PanelEnergyDecomposition({ decompData }) {
         <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 5, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={v => v.toFixed(2)} label={{ value: 'Shift vs pristine (eV)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => (v >= 0 ? '+' : '') + v.toFixed(3) + ' eV'} />
+          <YAxis tick={{ fontSize: 11 }} tickFormatter={v => (v != null ? v.toFixed(2) : '—')} label={{ value: 'Shift vs pristine (eV)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
+          <Tooltip formatter={v => (v != null ? (v >= 0 ? '+' : '') + v.toFixed(3) + ' eV' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           <Bar dataKey="elec" stackId="a" fill="#1f77b4" name="ΔE_elec" />
           <Bar dataKey="rep" stackId="a" fill="#ff7f0e" name="ΔE_rep" />
@@ -205,7 +205,7 @@ function PanelT50vsPressure({ t50Data }) {
             type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
           <YAxis tick={{ fontSize: 11 }} domain={[220, 385]}
             label={{ value: 'T₅₀ (K)', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => v.toFixed(1) + ' K'} labelFormatter={v => v + ' bar'} />
+          <Tooltip formatter={v => (v != null ? v.toFixed(1) + ' K' : '—')} labelFormatter={v => (v != null ? v + ' bar' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {systems.map(s => (
             <Line key={s} type="monotone" dataKey={systemShort(s)} stroke={systemColor(s)}
@@ -253,9 +253,9 @@ function PanelCoverageVsTemp({ covTData }) {
           <ReferenceArea x1={233} x2={358} fill="#10b981" fillOpacity={0.12} />
           <XAxis dataKey="T" tick={{ fontSize: 11 }} type="number" domain={['auto', 'auto']}
             label={{ value: 'Temperature (K)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} tickFormatter={v => v.toFixed(1)}
+          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} tickFormatter={v => (v != null ? v.toFixed(1) : '—')}
             label={{ value: 'Coverage θ', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => v?.toFixed(3)} labelFormatter={v => v + ' K'} />
+          <Tooltip formatter={v => (v != null ? v.toFixed(3) : '—')} labelFormatter={v => (v != null ? v + ' K' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {systems.map(s => (
             <Line key={s} type="monotone" dataKey={systemShort(s)} stroke={systemColor(s)}
@@ -301,9 +301,9 @@ function PanelCoverageVsPressure({ covPData }) {
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis dataKey="P" tick={{ fontSize: 11 }} scale="log" domain={['auto', 'auto']}
             type="number" label={{ value: 'Pressure (bar)', position: 'insideBottom', offset: -2, fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} tickFormatter={v => v.toFixed(1)}
+          <YAxis tick={{ fontSize: 11 }} domain={[0, 1]} tickFormatter={v => (v != null ? v.toFixed(1) : '—')}
             label={{ value: 'Coverage θ', angle: -90, position: 'insideLeft', fontSize: 11, dx: -5 }} />
-          <Tooltip formatter={v => v?.toFixed(3)} labelFormatter={v => v + ' bar'} />
+          <Tooltip formatter={v => (v != null ? v.toFixed(3) : '—')} labelFormatter={v => (v != null ? v + ' bar' : '—')} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
           {systems.map(s => (
             <Line key={s} type="monotone" dataKey={systemShort(s)} stroke={systemColor(s)}
