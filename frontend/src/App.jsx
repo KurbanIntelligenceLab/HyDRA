@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Atom, MessageSquare, Database, Lightbulb, FlaskConical, Brain, Eye, Upload } from 'lucide-react';
+import { Atom, MessageSquare, Database, Brain, Eye, Upload } from 'lucide-react';
 import { getProjects } from './api';
 import ChatPanel from './components/ChatPanel';
 import DescriptorDashboard from './components/DescriptorDashboard';
 import MoleculeViewer from './components/MoleculeViewer';
-import ThermoPlot from './components/ThermoPlot';
 import MLInsights from './components/MLInsights';
 import AgentWorkflow from './components/AgentWorkflow';
 import DataUpload from './components/DataUpload';
@@ -14,7 +13,6 @@ const TABS = [
   { id: 'chat', label: 'Agent Chat', icon: MessageSquare },
   { id: 'structure', label: '3D Structures', icon: Atom },
   { id: 'descriptors', label: 'Descriptors', icon: Database },
-  { id: 'thermo', label: 'Thermodynamics', icon: FlaskConical },
   { id: 'ml', label: 'ML Insights', icon: Brain },
   { id: 'workflow', label: 'Agent Workflow', icon: Eye },
   { id: 'upload', label: 'Upload Data', icon: Upload },
@@ -92,9 +90,6 @@ export default function App() {
         )}
         {activeTab === 'descriptors' && (
           <DescriptorDashboard project={project} />
-        )}
-        {activeTab === 'thermo' && (
-          <ThermoPlot project={project} />
         )}
         {activeTab === 'ml' && (
           <MLInsights project={project} />
