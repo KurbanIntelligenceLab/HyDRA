@@ -162,7 +162,7 @@ function PanelDescriptorShifts({ shiftsData }) {
 
 // ─── Panel (d): T50 vs Pressure ───
 function PanelT50vsPressure({ t50Data }) {
-  if (!t50Data) return null;
+  if (!t50Data || Object.keys(t50Data).length === 0) return null;
 
   const systems = Object.keys(t50Data);
   const order = ['Pristine', '1Zr', '2Zr'];
@@ -170,15 +170,25 @@ function PanelT50vsPressure({ t50Data }) {
 
   // Merge all pressure points into unified chart data
   const pressureSet = new Set();
-  systems.forEach(s => t50Data[s]?.pressures_bar?.forEach(p => pressureSet.add(p)));
+  systems.forEach(s => {
+    const pressures = t50Data[s]?.pressures_bar;
+    if (Array.isArray(pressures)) {
+      pressures.forEach(p => pressureSet.add(p));
+    }
+  });
   const pressures = [...pressureSet].sort((a, b) => a - b);
+
+  if (pressures.length === 0) return null;
 
   const chartData = pressures.map(p => {
     const point = { pressure: p };
     systems.forEach(s => {
-      const idx = t50Data[s]?.pressures_bar?.indexOf(p);
-      if (idx !== undefined && idx >= 0) {
-        point[systemShort(s)] = t50Data[s].T50_K[idx];
+      const sysData = t50Data[s];
+      if (!sysData || !Array.isArray(sysData.pressures_bar) || !Array.isArray(sysData.T50_K)) return;
+
+      const idx = sysData.pressures_bar.indexOf(p);
+      if (idx >= 0 && idx < sysData.T50_K.length) {
+        point[systemShort(s)] = sysData.   T50_K[idx];
       }
     });
     return point;
@@ -209,7 +219,7 @@ function PanelT50vsPressure({ t50Data }) {
 
 // ─── Panel (e): Coverage vs Temperature ───
 function PanelCoverageVsTemp({ covTData }) {
-  if (!covTData) return null;
+  if (!covTData || Object.keys(covTData).length === 0) return null;
 
   const systems = Object.keys(covTData);
   const order = ['Pristine', '1Zr', '2Zr'];
@@ -217,13 +227,19 @@ function PanelCoverageVsTemp({ covTData }) {
 
   // Downsample to ~50 points for performance
   const refSys = systems[0];
-  const temps = covTData[refSys]?.temperatures_K || [];
+  const sysData = covTData[refSys];
+  if (!sysData || !Array.isArray(sysData.temperatures_K) || sysData.temperatures_K.length === 0) return null;
+
+  const temps = sysData.temperatures_K;
   const step = Math.max(1, Math.floor(temps.length / 50));
   const chartData = [];
   for (let i = 0; i < temps.length; i += step) {
     const point = { T: temps[i] };
     systems.forEach(s => {
-      point[systemShort(s)] = covTData[s]?.coverages?.[i];
+      const data = covTData[s];
+      if (data && Array.isArray(data.coverages) && i < data.coverages.length) {
+        point[systemShort(s)] = data.coverages[i];
+      }
     });
     chartData.push(point);
   }
@@ -253,20 +269,26 @@ function PanelCoverageVsTemp({ covTData }) {
 
 // ─── Panel (f): Coverage vs Pressure ───
 function PanelCoverageVsPressure({ covPData }) {
-  if (!covPData) return null;
+  if (!covPData || Object.keys(covPData).length === 0) return null;
 
   const systems = Object.keys(covPData);
   const order = ['Pristine', '1Zr', '2Zr'];
   systems.sort((a, b) => order.indexOf(systemShort(a)) - order.indexOf(systemShort(b)));
 
   const refSys = systems[0];
-  const pressures = covPData[refSys]?.pressures_bar || [];
+  const sysData = covPData[refSys];
+  if (!sysData || !Array.isArray(sysData.pressures_bar) || sysData.pressures_bar.length === 0) return null;
+
+  const pressures = sysData.pressures_bar;
   const step = Math.max(1, Math.floor(pressures.length / 50));
   const chartData = [];
   for (let i = 0; i < pressures.length; i += step) {
     const point = { P: pressures[i] };
     systems.forEach(s => {
-      point[systemShort(s)] = covPData[s]?.coverages?.[i];
+      const data = covPData[s];
+      if (data && Array.isArray(data.coverages) && i < data.coverages.length) {
+        point[systemShort(s)] = data.coverages[i];
+      }
     });
     chartData.push(point);
   }
