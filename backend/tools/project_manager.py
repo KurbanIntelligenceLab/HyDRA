@@ -206,9 +206,27 @@ def get_project_data_path(project_name: str, session_id: str = None) -> Path:
 def get_project_csv_path(project_name: str, session_id: str = None) -> Path:
     """Get the CSV file path for a project."""
     path = _project_path(project_name, session_id)
-    csv_files = list(path.glob("*.csv"))
+
+    # Prefer labels.csv if it exists (main descriptor file)
+    labels_path = path / "labels.csv"
+    if labels_path.exists():
+        return labels_path
+
+    # Otherwise, look for any CSV with system_label column
+    csv_files = sorted(path.glob("*.csv"))  # Sort for consistency
     if not csv_files:
         raise ValueError(f"No CSV file in project '{project_name}'")
+
+    # Try to find a CSV with system_label column
+    for csv_file in csv_files:
+        try:
+            df = pd.read_csv(csv_file, nrows=1)
+            if "system_label" in df.columns:
+                return csv_file
+        except Exception:
+            continue
+
+    # Fallback to first CSV
     return csv_files[0]
 
 
