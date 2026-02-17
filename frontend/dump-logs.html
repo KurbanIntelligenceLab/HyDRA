@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DescriptorDashboard Debug Logs</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #2d2d2d;
+            border-left: 3px solid #007acc;
+            border-radius: 3px;
+        }
+        .timestamp {
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        .msg {
+            color: #dcdcaa;
+            margin: 5px 0;
+        }
+        .data {
+            color: #ce9178;
+            white-space: pre-wrap;
+            margin-left: 20px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 DescriptorDashboard Debug Logs</h1>
+    <button onclick="location.reload()">Refresh Logs</button>
+    <button onclick="clearLogs()">Clear Logs</button>
+    <button onclick="downloadLogs()">Download as JSON</button>
+    <div id="logs"></div>
+
+    <script>
+        function displayLogs() {
+            const logs = JSON.parse(localStorage.getItem('descriptorDebugLogs') || '[]');
+            const container = document.getElementById('logs');
+
+            if (logs.length === 0) {
+                container.innerHTML = '<p>No logs found. Make sure you\'ve visited the Descriptors tab in the app first.</p>';
+                return;
+            }
+
+            container.innerHTML = logs.map(log => `
+                <div class="log-entry">
+                    <div class="timestamp">${log.time}</div>
+                    <div class="msg">${log.msg}</div>
+                    <div class="data">${log.data}</div>
+                </div>
+            `).join('');
+        }
+
+        function clearLogs() {
+            if (confirm('Clear all debug logs?')) {
+                localStorage.removeItem('descriptorDebugLogs');
+                location.reload();
+            }
+        }
+
+        function downloadLogs() {
+            const logs = localStorage.getItem('descriptorDebugLogs') || '[]';
+            const blob = new Blob([logs], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `descriptor-logs-${new Date().toISOString()}.json`;
+            a.click();
+        }
+
+        displayLogs();
+    </script>
+</body>
+</html>

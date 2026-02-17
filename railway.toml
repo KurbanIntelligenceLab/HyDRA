@@ -1,0 +1,16 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r backend/requirements.txt"
+
+[deploy]
+startCommand = "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+# Environment variables (set these in Railway dashboard)
+# OPENROUTER_API_KEY
+# ALLOWED_ORIGINS
+# SESSION_SECRET_KEY
+# SESSION_MAX_AGE (optional, default: 7200)

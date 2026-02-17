@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+docs
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# macOS
+.DS_Store
+
+# PySR artifacts
+.pysr_*/
+hall_of_fame*
+
+# User projects (keep built-in zr-tio2)
+backend/projects/*/
+!backend/projects/zr-tio2/
+
+# Session data (never commit)
+backend/sessions/
+
+# IDE
+.vscode/
+.idea/
