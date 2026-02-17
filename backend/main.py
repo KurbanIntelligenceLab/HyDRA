@@ -4,6 +4,7 @@ import math
 import os
 import secrets
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Response
@@ -16,10 +17,56 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from .tools import project_manager, csv_tools, xyz_tools, thermo_tools, ml_tools
 from .agents.orchestrator import process_query
 
+
+# Startup/shutdown lifespan handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Preload data on startup for faster first requests."""
+    print("🚀 HyDRA starting up...")
+    print("📦 Preloading zr-tio2 project data...")
+
+    try:
+        # Preload built-in project data
+        project = "zr-tio2"
+
+        # 1. Load descriptor data (CSV)
+        print("  ├─ Loading descriptors...")
+        csv_tools.load_descriptor_data(project)
+
+        # 2. Compute correlation matrix
+        print("  ├─ Computing correlation matrix...")
+        csv_tools.compute_correlation_matrix(project)
+
+        # 3. Compute descriptor shifts
+        print("  ├─ Computing descriptor shifts...")
+        csv_tools.compute_descriptor_shifts(project)
+
+        # 4. Load structures list
+        print("  ├─ Loading structure list...")
+        structures = xyz_tools.list_xyz_files(project)
+
+        # 5. Preload first structure as sample
+        if structures:
+            print(f"  ├─ Preloading sample structure ({structures[0]['system_label']})...")
+            xyz_tools.generate_3d_viz_data(project, structures[0]['system_label'])
+
+        print("✅ Data preloaded successfully!")
+
+    except Exception as e:
+        print(f"⚠️  Warning: Could not preload data: {e}")
+        print("   App will still work, data will load on first request.")
+
+    yield  # App runs here
+
+    # Shutdown
+    print("👋 HyDRA shutting down...")
+
+
 app = FastAPI(
     title="HyDRA",
     description="Hydrogen Discovery via Reactive Agents — multi-agent system for computational materials science",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Session management

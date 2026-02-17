@@ -5,6 +5,11 @@ from pathlib import Path
 from .project_manager import get_project_xyz_dir
 
 
+# Cache for parsed structures
+_structure_cache = {}
+_structure_list_cache = {}
+
+
 # Covalent radii (Å) for common elements in oxide nanoparticles
 COVALENT_RADII = {
     "H": 0.31, "O": 0.66, "Ti": 1.60, "Zr": 1.75, "N": 0.71,
@@ -64,7 +69,11 @@ def parse_xyz(filepath: str | Path) -> dict:
 
 
 def list_xyz_files(project: str) -> list[dict]:
-    """List available XYZ files for a project."""
+    """List available XYZ files for a project with caching."""
+    cache_key = f"{project}_list"
+    if cache_key in _structure_list_cache:
+        return _structure_list_cache[cache_key]
+
     xyz_dir = get_project_xyz_dir(project)
     if not xyz_dir.exists():
         return []
@@ -75,6 +84,8 @@ def list_xyz_files(project: str) -> list[dict]:
             "system_label": f.stem,
             "path": str(f),
         })
+
+    _structure_list_cache[cache_key] = files
     return files
 
 
@@ -193,7 +204,11 @@ def compute_charge_distribution(project: str, system_label: str) -> dict:
 
 
 def generate_3d_viz_data(project: str, system_label: str) -> dict:
-    """Generate JSON data for 3Dmol.js visualization."""
+    """Generate JSON data for 3Dmol.js visualization with caching."""
+    cache_key = f"{project}_{system_label}"
+    if cache_key in _structure_cache:
+        return _structure_cache[cache_key]
+
     xyz_dir = get_project_xyz_dir(project)
     filepath = xyz_dir / f"{system_label}.xyz"
     if not filepath.exists():
@@ -233,7 +248,7 @@ def generate_3d_viz_data(project: str, system_label: str) -> dict:
         xyz_lines.append(line)
     xyz_text = "\n".join(xyz_lines)
 
-    return {
+    result = {
         "system_label": system_label,
         "num_atoms": data["num_atoms"],
         "elements": data["elements"],
@@ -242,3 +257,7 @@ def generate_3d_viz_data(project: str, system_label: str) -> dict:
         "has_charges": has_charges,
         "charge_range": {"min": charge_min, "max": charge_max} if has_charges else None,
     }
+
+    # Cache the result
+    _structure_cache[cache_key] = result
+    return result

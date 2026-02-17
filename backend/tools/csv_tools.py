@@ -2,18 +2,33 @@
 
 import pandas as pd
 import numpy as np
+from functools import lru_cache
 from .project_manager import get_project_csv_path
 
 
+# Cache for descriptor data to avoid reloading CSV files
+_descriptor_cache = {}
+
+
 def load_descriptor_data(project: str) -> pd.DataFrame:
-    """Load the descriptor CSV for a project into a DataFrame."""
+    """Load the descriptor CSV for a project into a DataFrame with caching."""
+    # Check cache first
+    if project in _descriptor_cache:
+        return _descriptor_cache[project].copy()
+
+    # Load from file
     csv_path = get_project_csv_path(project)
     df = pd.read_csv(csv_path)
+
     # Strip whitespace from column names and string values
     df.columns = df.columns.str.strip()
     for col in df.select_dtypes(include="object").columns:
         df[col] = df[col].str.strip()
-    return df
+
+    # Cache it
+    _descriptor_cache[project] = df
+
+    return df.copy()
 
 
 def get_system_properties(project: str, system_label: str) -> dict:
