@@ -22,16 +22,15 @@ In your Railway project dashboard, go to **Variables** and add:
 # Required
 OPENROUTER_API_KEY=sk-or-v1-xxxxx
 
-# Important: Update this after configuring your domain
-ALLOWED_ORIGINS=https://hydra.kurbanintelligence.lab
-
 # Generate a secure key (run: openssl rand -hex 32)
 SESSION_SECRET_KEY=your-64-character-hex-key-here
 
-# Optional
+# Optional - Add these if needed
 SESSION_MAX_AGE=7200
 OPENROUTER_MODEL=anthropic/claude-sonnet-4
 ```
+
+**Note:** Don't set `ALLOWED_ORIGINS` yet - you'll add it after deployment when you see your Railway URL.
 
 ### 4. Deploy
 
@@ -39,9 +38,22 @@ Railway will automatically:
 - ✅ Build your React frontend
 - ✅ Build your Python backend
 - ✅ Serve everything from one URL
+- ✅ Assign a domain (e.g., `https://hydra-production.up.railway.app`)
 - ✅ Monitor health at `/api/health`
 
-### 5. Configure Custom Domain
+### 5. Set ALLOWED_ORIGINS
+
+After deployment completes:
+
+1. **Copy your Railway URL** from the dashboard (e.g., `hydra-production.up.railway.app`)
+2. **Go to Variables** → Add new variable:
+   ```bash
+   ALLOWED_ORIGINS=https://hydra-production.up.railway.app
+   ```
+   Replace with your actual Railway URL (include `https://`)
+3. Railway will auto-redeploy with the new variable
+
+### 6. Configure Custom Domain (Optional)
 
 To use `hydra.kurbanintelligence.lab`:
 
