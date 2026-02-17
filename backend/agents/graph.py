@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import operator
 from typing import Annotated, TypedDict
@@ -89,9 +90,8 @@ def route_query(state: AgentState) -> AgentState:
     return {**state, "route": routes[0], "active_agents": routes, "agent_results": {}}
 
 
-def run_agents(state: AgentState) -> AgentState:
-    """Run all routed specialist agents and collect results."""
-    results = {}
+async def run_agents(state: AgentState) -> AgentState:
+    """Run all routed specialist agents in parallel and collect results."""
     agent_map = {
         "descriptor": run_descriptor_agent,
         "structure": run_structure_agent,
@@ -100,15 +100,30 @@ def run_agents(state: AgentState) -> AgentState:
         "reasoning": run_reasoning_agent,
     }
 
-    # Run agents sequentially (safe for Uvicorn/FastAPI)
-    for agent_name in state["active_agents"]:
-        if agent_name in agent_map:
-            try:
-                results[agent_name] = agent_map[agent_name](state["query"], state["project"])
-            except Exception as e:
-                results[agent_name] = {"error": str(e)}
-        else:
-            results[agent_name] = {"error": "Unknown agent"}
+    async def run_agent_safe(agent_name: str):
+        """Run a single agent with error handling."""
+        if agent_name not in agent_map:
+            return agent_name, {"error": "Unknown agent"}
+
+        try:
+            # Run in thread pool to avoid blocking
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None,
+                agent_map[agent_name],
+                state["query"],
+                state["project"]
+            )
+            return agent_name, result
+        except Exception as e:
+            return agent_name, {"error": str(e)}
+
+    # Run all agents in parallel
+    tasks = [run_agent_safe(agent_name) for agent_name in state["active_agents"]]
+    agent_results = await asyncio.gather(*tasks)
+
+    # Convert list of tuples to dict
+    results = dict(agent_results)
 
     return {**state, "agent_results": results}
 
