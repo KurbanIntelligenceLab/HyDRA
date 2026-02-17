@@ -8,7 +8,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -437,3 +438,29 @@ def run_feature_importance(project: str):
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "version": "1.0.0"}
+
+
+# ──────────────────────────────────────────────────────────────
+# Serve frontend static files (for production deployment)
+# ──────────────────────────────────────────────────────────────
+
+# Check if frontend build exists
+frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+if frontend_dist.exists():
+    # Mount static files (JS, CSS, images, etc.)
+    app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
+
+    # Serve index.html for all non-API routes (SPA fallback)
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Don't intercept API routes
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+
+        # Try to serve the requested file
+        file_path = frontend_dist / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+
+        # Otherwise serve index.html (SPA fallback)
+        return FileResponse(frontend_dist / "index.html")

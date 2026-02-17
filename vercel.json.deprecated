@@ -1,3 +1,6 @@
+# This file is deprecated - HyDRA now deploys entirely on Railway
+# Keeping for reference only
+
 {
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
