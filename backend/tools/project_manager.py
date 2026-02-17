@@ -34,19 +34,31 @@ def get_current_session() -> str:
 
 def _project_path(name: str, session_id: str = None) -> Path:
     """Get project path - session-scoped for user projects, built-in for built-in projects."""
+    import logging
+    logger = logging.getLogger(__name__)
+
     # Use explicitly passed session_id, or fall back to context session_id
     if session_id is None:
         session_id = get_current_session()
 
+    logger.info(f"[Project] _project_path(name={name}, session_id={session_id})")
+    logger.info(f"[Project] BUILTIN_PROJECT={BUILTIN_PROJECT}, BUILTIN_PROJECTS_DIR={BUILTIN_PROJECTS_DIR}")
+
     if name == BUILTIN_PROJECT:
         # Built-in project is shared (read-only)
-        return BUILTIN_PROJECTS_DIR / name
+        path = BUILTIN_PROJECTS_DIR / name
+        logger.info(f"[Project] Using built-in project path: {path}")
+        return path
     elif session_id:
         # User projects are session-scoped
-        return _session_path(session_id) / "projects" / name
+        path = _session_path(session_id) / "projects" / name
+        logger.info(f"[Project] Using session project path: {path}")
+        return path
     else:
         # Fallback to built-in projects dir (for backwards compatibility)
-        return BUILTIN_PROJECTS_DIR / name
+        path = BUILTIN_PROJECTS_DIR / name
+        logger.info(f"[Project] Using fallback project path: {path}")
+        return path
 
 
 def list_projects(session_id: str = None) -> list[dict]:
