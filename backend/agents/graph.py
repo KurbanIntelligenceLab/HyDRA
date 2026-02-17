@@ -51,6 +51,7 @@ Examples:
 {"routes": ["descriptor", "thermo", "reasoning"]} - "why" questions
 
 Respond ONLY with JSON: {"routes": [...]}
+"""
 
 
 SYNTHESIS_SYSTEM_PROMPT = """You are a materials science expert synthesizing results from multiple specialist agents.
