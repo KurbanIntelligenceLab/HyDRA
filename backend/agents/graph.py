@@ -155,7 +155,7 @@ def build_graph() -> StateGraph:
 materials_graph = build_graph()
 
 
-def run_query(query: str, project: str, messages: list | None = None) -> dict:
+async def run_query(query: str, project: str, messages: list | None = None) -> dict:
     """Run a query through the multi-agent graph.
 
     Returns dict with 'response', 'active_agents', and 'agent_results'.
@@ -170,7 +170,8 @@ def run_query(query: str, project: str, messages: list | None = None) -> dict:
         "active_agents": [],
     }
 
-    result = materials_graph.invoke(initial_state)
+    # Use ainvoke for async execution (better for FastAPI)
+    result = await materials_graph.ainvoke(initial_state)
 
     return {
         "response": result["final_response"],

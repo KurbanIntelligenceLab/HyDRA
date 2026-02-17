@@ -15,6 +15,5 @@ async def process_query(query: str, project: str = "zr-tio2",
     Returns:
         dict with 'response', 'active_agents', 'agent_results'
     """
-    # run_query is now synchronous (LangGraph.invoke is sync)
-    # but we're called in async context, so just run it directly
-    return run_query(query, project, messages)
+    # Use async ainvoke for non-blocking execution in FastAPI
+    return await run_query(query, project, messages)
