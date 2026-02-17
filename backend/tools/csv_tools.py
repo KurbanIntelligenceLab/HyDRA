@@ -12,25 +12,24 @@ _descriptor_cache = {}
 
 def load_descriptor_data(project: str) -> pd.DataFrame:
     """Load the descriptor CSV for a project into a DataFrame with caching."""
-    import logging
-    logger = logging.getLogger(__name__)
-
     # Check cache first
     if project in _descriptor_cache:
-        logger.info(f"[CSV] Cache hit for project '{project}'")
+        print(f"[CSV] Cache hit for project '{project}'")
         return _descriptor_cache[project].copy()
 
     # Load from file
     csv_path = get_project_csv_path(project)
-    logger.info(f"[CSV] Loading CSV from: {csv_path}")
-    logger.info(f"[CSV] File exists: {csv_path.exists()}")
+    print(f"[CSV] Loading CSV from: {csv_path}")
+    print(f"[CSV] File exists: {csv_path.exists()}")
 
     df = pd.read_csv(csv_path)
-    logger.info(f"[CSV] Loaded {len(df)} rows, columns: {df.columns.tolist()}")
+    print(f"[CSV] Loaded {len(df)} rows")
+    print(f"[CSV] Raw columns: {df.columns.tolist()}")
 
     # Strip whitespace from column names and string values
     df.columns = df.columns.str.strip()
-    logger.info(f"[CSV] After stripping, columns: {df.columns.tolist()}")
+    print(f"[CSV] After stripping columns: {df.columns.tolist()}")
+    print(f"[CSV] 'system_label' in columns: {'system_label' in df.columns}")
 
     for col in df.select_dtypes(include="object").columns:
         df[col] = df[col].str.strip()
