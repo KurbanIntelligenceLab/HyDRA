@@ -4,7 +4,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -32,7 +32,7 @@ services:
   cleanup:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: Dockerfile
     environment:
       - CLEANUP_MAX_AGE=${CLEANUP_MAX_AGE:-7200}
       - CLEANUP_INTERVAL=${CLEANUP_INTERVAL:-1800}
