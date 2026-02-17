@@ -31,34 +31,26 @@ class AgentState(TypedDict):
 
 # The LLM used for routing and synthesis
 def _get_llm():
-    return get_llm(max_tokens=2000)
+    return get_llm(max_tokens=1000)  # Reduced for faster responses
 
 
-ROUTER_SYSTEM_PROMPT = """You are an orchestrator for a materials science multi-agent system.
-Your job is to classify user queries and route them to the right specialist agent(s).
+ROUTER_SYSTEM_PROMPT = """Route user queries to agents. Respond with JSON only.
 
-Available agents:
-- "descriptor": Electronic structure analysis (HOMO, LUMO, band gap, chemical hardness, correlations)
-- "structure": 3D structural analysis (XYZ geometries, coordination numbers, charge distributions, adsorption sites)
-- "thermo": Thermodynamic calculations (Langmuir coverage, desorption temperature T_50, operating feasibility)
-- "screening": ML-based screening (symbolic regression, Gaussian Process predictions, active learning suggestions)
-- "reasoning": Mechanistic interpretation and literature context
-
-Rules:
-1. You MUST respond with a JSON object containing a "routes" array of agent names to invoke.
-2. For simple queries, route to 1 agent. For complex queries, route to 2-3 agents.
-3. Always include "reasoning" when the user asks "why" or wants explanations alongside computations.
+Agents:
+- descriptor: Electronic properties (HOMO, LUMO, band gap)
+- structure: 3D geometry, coordination, charges
+- thermo: Coverage, desorption temp, thermodynamics
+- screening: ML predictions, symbolic regression
+- reasoning: Explanations and context
 
 Examples:
-- "What are the electronic properties of 1Zr-TiO2?" → {"routes": ["descriptor"]}
-- "Show me the 3D structure" → {"routes": ["structure"]}
-- "What's the coverage at 300K and 5 bar?" → {"routes": ["thermo"]}
-- "Suggest the next dopant to test" → {"routes": ["screening", "reasoning"]}
-- "Why does Zr decoration improve deliverability?" → {"routes": ["descriptor", "thermo", "reasoning"]}
-- "Compare all systems" → {"routes": ["descriptor", "thermo"]}
-- "Find an interpretable formula for E_ads" → {"routes": ["screening"]}
+{"routes": ["descriptor"]} - properties questions
+{"routes": ["structure"]} - 3D structure
+{"routes": ["thermo"]} - coverage/temperature
+{"routes": ["screening"]} - ML/predictions
+{"routes": ["descriptor", "thermo", "reasoning"]} - "why" questions
 
-Respond ONLY with the JSON object, nothing else."""
+Respond ONLY with JSON: {"routes": [...]}
 
 
 SYNTHESIS_SYSTEM_PROMPT = """You are a materials science expert synthesizing results from multiple specialist agents.
@@ -98,6 +90,8 @@ def route_query(state: AgentState) -> AgentState:
 
 def run_agents(state: AgentState) -> AgentState:
     """Run all routed specialist agents and collect results."""
+    import asyncio
+
     results = {}
     agent_map = {
         "descriptor": run_descriptor_agent,
@@ -107,13 +101,28 @@ def run_agents(state: AgentState) -> AgentState:
         "reasoning": run_reasoning_agent,
     }
 
-    for agent_name in state["active_agents"]:
+    # Run agents in parallel for speed
+    async def run_agent_async(agent_name):
         if agent_name in agent_map:
             try:
-                result = agent_map[agent_name](state["query"], state["project"])
-                results[agent_name] = result
+                # Run in executor to parallelize synchronous agent calls
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(
+                    None, agent_map[agent_name], state["query"], state["project"]
+                )
+                return agent_name, result
             except Exception as e:
-                results[agent_name] = {"error": str(e)}
+                return agent_name, {"error": str(e)}
+        return agent_name, {"error": "Unknown agent"}
+
+    # Run all agents concurrently
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    tasks = [run_agent_async(name) for name in state["active_agents"]]
+    agent_results = loop.run_until_complete(asyncio.gather(*tasks))
+    loop.close()
+
+    results = {name: result for name, result in agent_results}
 
     return {**state, "agent_results": results}
 

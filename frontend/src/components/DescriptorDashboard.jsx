@@ -178,6 +178,14 @@ export default function DescriptorDashboard({ project }) {
                 <tr key={row}>
                   <td className="p-1 font-medium text-slate-600 whitespace-nowrap">{row}</td>
                   {correlation.matrix[i].map((val, j) => {
+                    // Handle null values (constant columns have undefined correlation)
+                    if (val === null || val === undefined || isNaN(val)) {
+                      return (
+                        <td key={j} className="p-1 text-center text-slate-300">
+                          —
+                        </td>
+                      );
+                    }
                     const absVal = Math.abs(val);
                     const color = val > 0
                       ? `rgba(59, 130, 246, ${absVal * 0.8})`
