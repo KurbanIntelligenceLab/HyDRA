@@ -27,9 +27,9 @@ export default function ChatPanel({ project, onAgentActivity, messages: external
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const query = input.trim();
+  const handleSend = async (quickQuery = null) => {
+    const query = quickQuery ? quickQuery.trim() : input.trim();
+    if (!query || loading) return;
     setInput('');
     setMessages((prev) => [...prev, { role: 'user', content: query }]);
     setLoading(true);
@@ -83,8 +83,9 @@ export default function ChatPanel({ project, onAgentActivity, messages: external
           {QUICK_QUESTIONS.map((q, i) => (
             <button
               key={i}
-              onClick={() => setInput(q)}
-              className="text-xs bg-white hover:bg-blue-50 text-slate-600 px-3 py-1.5 rounded-full border border-slate-200 transition-colors"
+              onClick={() => handleSend(q)}
+              disabled={loading}
+              className="text-xs bg-white hover:bg-blue-50 text-slate-600 px-3 py-1.5 rounded-full border border-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {q}
             </button>
