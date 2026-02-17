@@ -155,7 +155,7 @@ def build_graph() -> StateGraph:
 materials_graph = build_graph()
 
 
-async def run_query(query: str, project: str, messages: list | None = None) -> dict:
+def run_query(query: str, project: str, messages: list | None = None) -> dict:
     """Run a query through the multi-agent graph.
 
     Returns dict with 'response', 'active_agents', and 'agent_results'.
