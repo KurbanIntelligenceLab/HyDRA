@@ -142,8 +142,8 @@ export default function ChatPanel({ project, onAgentActivity, messages: external
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>
               {activeAgents.length > 0
-                ? `Agents working: ${activeAgents.join(', ')}...`
-                : 'Routing query...'}
+                ? `Analyzing with ${activeAgents.join(', ')}...`
+                : 'Thinking...'}
             </span>
           </div>
         )}

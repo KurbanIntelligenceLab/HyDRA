@@ -361,7 +361,6 @@ export default function PublicationFigures({ project }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4">Publication Figures</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="border border-slate-100 rounded-lg p-3">
           <PanelEadsLollipop eadsData={eads} />
